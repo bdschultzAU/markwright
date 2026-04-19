@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Markwright">
+  <defs>
+    <linearGradient id="mw-bg" x1="8" y1="0" x2="56" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1e3a8a"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#mw-bg)"/>
+  <text
+    x="32"
+    y="41"
+    text-anchor="middle"
+    font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif"
+    font-size="21"
+    font-weight="700"
+    fill="#f8fafc"
+    letter-spacing="-0.06em"
+  >MW</text>
+</svg>
