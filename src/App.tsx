@@ -10,15 +10,17 @@ function unescapeNewlines(text: string): string {
   return text.replace(/\\n/g, "\n");
 }
 
-const SAMPLE = `## Analysis Summary
+const SAMPLE = `## Welcome
 
-**Test Method:** basePlaywrightTestBeforeMethod (ID: 972591)  
-**Execution:** SF Service Cloud Voice daily build 2017 in TEST environment  
-**Failure Time:** 2026-04-14 05:55:10 - 05:55:13 UTC (3-second duration)
+**Markwright** is a simple Markdown editor with a live preview.\\nThis paragraph is stored as one line with a literal **\\n** in the middle—use **Options** → *Treat \\n as newline* to expand those into real line breaks.
 
-## Root Cause
+Here is a tiny list written on one editor line:\\n- Morning coffee\\n- A walk outside\\n- Something creative
 
-The failure occurred during the **test setup phase** in the \`basePlaywrightTestBeforeMethod\`, specifically during user creation and DID pool operations.`;
+---
+
+## Tips
+
+Use **Export PDF** when you want a printable copy.\\nSingle line breaks in the preview use *remark-breaks* (GitHub-style) so you do not need blank lines everywhere.`;
 
 export default function App() {
   const [raw, setRaw] = useState(SAMPLE);
