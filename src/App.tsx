@@ -12,9 +12,11 @@ function unescapeNewlines(text: string): string {
 
 const SAMPLE = `## Welcome
 
-**Markwright** is a simple Markdown editor with a live preview.\\nThis paragraph is stored as one line with a literal **\\n** in the middle—use **Options** → *Treat \\n as newline* to expand those into real line breaks.
+**Markwright** is a simple Markdown editor with a live preview.\\nThis paragraph is one long line in the editor until you expand paste-style newlines—use **Options** and the checkbox there (it targets a backslash plus "n", two characters).
 
-Here is a tiny list written on one editor line:\\n- Morning coffee\\n- A walk outside\\n- Something creative
+Keep those pairs in **plain text** or list lines. If you tuck them inside **bold** or *italics*, the expander turns them into real line breaks *inside* the emphasis span and the preview looks wrong.
+
+Tiny list on one editor line:\\n- Morning coffee\\n- A walk outside\\n- Something creative
 
 ---
 
