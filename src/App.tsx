@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
+import dogbertImg from "../dogbert.jpg";
 import "./App.css";
 
 /** Turn JSON-style escaped newlines into real line breaks (paste-friendly). */
@@ -24,6 +25,7 @@ export default function App() {
   const [unescapeLiteral, setUnescapeLiteral] = useState(true);
   const [pdfExporting, setPdfExporting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const previewRef = useRef<HTMLElement>(null);
 
   const markdown = useMemo(
@@ -67,11 +69,27 @@ export default function App() {
     return () => document.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!aboutOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setAboutOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [aboutOpen]);
+
   return (
     <div className="app">
       <header className="topbar">
         <h1 className="brand">Markwright</h1>
         <div className="topbar-actions">
+          <button
+            type="button"
+            className="about-button"
+            onClick={() => setAboutOpen(true)}
+          >
+            About
+          </button>
           <button
             type="button"
             className="icon-button"
@@ -96,6 +114,39 @@ export default function App() {
           </button>
         </div>
       </header>
+
+      {aboutOpen && (
+        <>
+          <button
+            type="button"
+            className="modal-backdrop"
+            aria-label="Close about dialog"
+            onClick={() => setAboutOpen(false)}
+          />
+          <div
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="about-heading"
+          >
+            <button
+              type="button"
+              className="modal-close"
+              aria-label="Close about dialog"
+              onClick={() => setAboutOpen(false)}
+            >
+              ×
+            </button>
+            <h2 id="about-heading" className="modal-title">
+              About
+            </h2>
+            <p className="modal-tagline">Developed by B Schultz</p>
+            <div className="modal-figure">
+              <img src={dogbertImg} alt="Dogbert" className="modal-dogbert" />
+            </div>
+          </div>
+        </>
+      )}
 
       {menuOpen && (
         <button
