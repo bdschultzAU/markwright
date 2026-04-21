@@ -295,6 +295,192 @@ function IconMoon() {
   );
 }
 
+function JsonChevron() {
+  return (
+    <svg
+      className="json-tree-chevron-svg"
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      aria-hidden
+    >
+      <path d="M3 2 L9 6 L3 10 Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function JsonExpandableObject({ entries }: { entries: [string, unknown][] }) {
+  const [open, setOpen] = useState(true);
+  const n = entries.length;
+  return (
+    <span className="json-tree-expandable">
+      <span className="json-tree-expandable-head">
+        <button
+          type="button"
+          className="json-tree-caret"
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+          aria-label={open ? "Collapse object" : "Expand object"}
+        >
+          <JsonChevron />
+        </button>
+        {open ? (
+          <span className="json-tree-punct">{"{"}</span>
+        ) : (
+          <span className="json-tree-folded">
+            <span className="json-tree-punct">{"{"}</span>
+            <span className="json-tree-folded-meta">
+              {n} {n === 1 ? "key" : "keys"}
+            </span>
+            <span className="json-tree-punct">{"}"}</span>
+          </span>
+        )}
+      </span>
+      {open && (
+        <>
+          <ul className="json-tree-list">
+            {entries.map(([k, v], i) => (
+              <li key={k} className="json-tree-item">
+                <div className="json-tree-prop">
+                  <span className="json-tree-key">{JSON.stringify(k)}</span>
+                  <span className="json-tree-colon">: </span>
+                  <span className="json-tree-value-cell">
+                    <JsonTreeValue value={v} />
+                  </span>
+                  {i < n - 1 && <span className="json-tree-punct json-tree-comma">,</span>}
+                </div>
+              </li>
+            ))}
+          </ul>
+          <span className="json-tree-punct json-tree-close-bracket">{"}"}</span>
+        </>
+      )}
+    </span>
+  );
+}
+
+function JsonExpandableArray({ items }: { items: unknown[] }) {
+  const [open, setOpen] = useState(true);
+  const n = items.length;
+  return (
+    <span className="json-tree-expandable">
+      <span className="json-tree-expandable-head">
+        <button
+          type="button"
+          className="json-tree-caret"
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+          aria-label={open ? "Collapse array" : "Expand array"}
+        >
+          <JsonChevron />
+        </button>
+        {open ? (
+          <span className="json-tree-punct">{"["}</span>
+        ) : (
+          <span className="json-tree-folded">
+            <span className="json-tree-punct">{"["}</span>
+            <span className="json-tree-folded-meta">
+              {n} {n === 1 ? "item" : "items"}
+            </span>
+            <span className="json-tree-punct">{"]"}</span>
+          </span>
+        )}
+      </span>
+      {open && (
+        <>
+          <ul className="json-tree-list json-tree-list--array">
+            {items.map((item, i) => (
+              <li key={i} className="json-tree-item">
+                <div className="json-tree-prop">
+                  <span className="json-tree-index">{i}</span>
+                  <span className="json-tree-colon">: </span>
+                  <span className="json-tree-value-cell">
+                    <JsonTreeValue value={item} />
+                  </span>
+                  {i < n - 1 && <span className="json-tree-punct json-tree-comma">,</span>}
+                </div>
+              </li>
+            ))}
+          </ul>
+          <span className="json-tree-punct json-tree-close-bracket">{"]"}</span>
+        </>
+      )}
+    </span>
+  );
+}
+
+function JsonTreeValue({ value }: { value: unknown }) {
+  if (value === null) {
+    return <span className="json-tree-null">null</span>;
+  }
+  const t = typeof value;
+  if (t === "boolean") {
+    return <span className="json-tree-bool">{value ? "true" : "false"}</span>;
+  }
+  if (t === "number") {
+    return <span className="json-tree-number">{String(value)}</span>;
+  }
+  if (t === "string") {
+    return <span className="json-tree-string">{JSON.stringify(value)}</span>;
+  }
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return <span className="json-tree-punct">[]</span>;
+    }
+    return <JsonExpandableArray items={value} />;
+  }
+  if (t === "object") {
+    const entries = Object.entries(value as Record<string, unknown>);
+    if (entries.length === 0) {
+      return <span className="json-tree-punct">{"{}"}</span>;
+    }
+    return <JsonExpandableObject entries={entries} />;
+  }
+  return <span className="json-tree-unknown">{String(value)}</span>;
+}
+
+function PreviewJsonBlock({ pretty }: { pretty: string }) {
+  const [mode, setMode] = useState<"nested" | "pretty">("pretty");
+  const parsed = useMemo(() => {
+    try {
+      return JSON.parse(pretty) as unknown;
+    } catch {
+      return null;
+    }
+  }, [pretty]);
+
+  const toggle = () => setMode((m) => (m === "pretty" ? "nested" : "pretty"));
+
+  return (
+    <div className="preview-json-block">
+      <div className="preview-json-surface">
+        {parsed !== null && (
+          <div className="preview-json-toolbar">
+            <button
+              type="button"
+              className="preview-json-toggle"
+              onClick={toggle}
+              aria-pressed={mode === "nested"}
+              title={mode === "pretty" ? "Show nested tree" : "Show pretty-printed JSON"}
+            >
+              {mode === "pretty" ? "Nested" : "Pretty"}
+            </button>
+          </div>
+        )}
+        {mode === "nested" && parsed !== null ? (
+          <div className="preview-json-tree">
+            <JsonTreeValue value={parsed} />
+          </div>
+        ) : (
+          <pre className="preview-json preview-json-body">
+            <code>{pretty}</code>
+          </pre>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /** Solid gear—reads clearly at 20px; thin stroke icons looked uneven in the header. */
 function IconGear() {
   return (
@@ -547,9 +733,7 @@ export default function App() {
             <article ref={previewRef} className="preview">
               {previewModel.parts.map((part, idx) =>
                 part.type === "json" ? (
-                  <pre key={idx} className="preview-json">
-                    <code>{part.pretty}</code>
-                  </pre>
+                  <PreviewJsonBlock key={idx} pretty={part.pretty} />
                 ) : (
                   <div key={idx} className="preview-md-segment">
                     <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>

@@ -607,18 +607,257 @@ html[data-theme="dark"] {
   color: inherit;
 }
 
-.preview-json {
+.preview-json-block {
   margin-bottom: 1rem;
 }
 
-html[data-theme="dark"] .preview-json {
-  background: #f8fafc;
-  color: #0f172a;
-  border: 1px solid #cbd5e1;
+.preview-json-surface {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--preview-pre-bg);
+  color: var(--preview-pre-text);
+  border: 1px solid transparent;
 }
 
-html[data-theme="dark"] .preview-json code {
+html[data-theme="dark"] .preview-json-surface {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.preview-json-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0.3rem 0.45rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .preview-json-toolbar {
+  border-bottom-color: #e2e8f0;
+}
+
+.preview-json-toggle {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
   color: inherit;
+  cursor: pointer;
+}
+
+.preview-json-toggle:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+html[data-theme="dark"] .preview-json-toggle {
+  border-color: #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+}
+
+html[data-theme="dark"] .preview-json-toggle:hover {
+  background: #f1f5f9;
+}
+
+/* Pretty JSON: inherit surface foreground (fixes dark theme where .preview pre still uses --preview-pre-text). */
+.preview-json-surface .preview-json-body,
+.preview-json-surface .preview-json-body code {
+  color: inherit;
+}
+
+.preview-json-body {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.preview-json-tree {
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  overflow-x: auto;
+  color: inherit;
+}
+
+.json-tree-list {
+  list-style: none;
+  margin: 0.2rem 0 0;
+  padding: 0 0 0 0.75rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+html[data-theme="dark"] .json-tree-list {
+  border-left-color: #94a3b8;
+}
+
+.json-tree-item {
+  margin: 0.15rem 0;
+}
+
+.json-tree-prop {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  gap: 0 0.35rem;
+  align-items: start;
+}
+
+.json-tree-key {
+  grid-column: 1;
+  color: #7dd3fc;
+}
+
+html[data-theme="dark"] .json-tree-key {
+  color: #0369a1;
+}
+
+.json-tree-colon {
+  grid-column: 2;
+  opacity: 0.65;
+  user-select: none;
+}
+
+.json-tree-value-cell {
+  grid-column: 3;
+  min-width: 0;
+}
+
+.json-tree-comma {
+  grid-column: 4;
+  opacity: 0.65;
+  user-select: none;
+}
+
+.json-tree-index {
+  grid-column: 1;
+  display: inline-block;
+  min-width: 1.5rem;
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-theme="dark"] .json-tree-index {
+  color: #64748b;
+}
+
+.json-tree-expandable {
+  display: block;
+  width: 100%;
+}
+
+.json-tree-expandable-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  vertical-align: top;
+}
+
+.json-tree-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.json-tree-caret:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .json-tree-caret:hover {
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.json-tree-caret:focus-visible {
+  outline: 2px solid var(--preview-link);
+  outline-offset: 1px;
+}
+
+.json-tree-chevron-svg {
+  display: block;
+  transform: rotate(0deg);
+  transition: transform 0.12s ease;
+}
+
+.json-tree-caret[aria-expanded="true"] .json-tree-chevron-svg {
+  transform: rotate(90deg);
+}
+
+.json-tree-punct {
+  opacity: 0.85;
+  user-select: none;
+}
+
+.json-tree-folded {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.json-tree-folded-meta {
+  opacity: 0.75;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+.json-tree-close-bracket {
+  display: block;
+  margin-top: 0.15rem;
+}
+
+.json-tree-string {
+  color: #86efac;
+  word-break: break-word;
+}
+
+html[data-theme="dark"] .json-tree-string {
+  color: #15803d;
+}
+
+.json-tree-number {
+  color: #fcd34d;
+}
+
+html[data-theme="dark"] .json-tree-number {
+  color: #a16207;
+}
+
+.json-tree-bool {
+  color: #f9a8d4;
+}
+
+html[data-theme="dark"] .json-tree-bool {
+  color: #be185d;
+}
+
+.json-tree-null {
+  color: #c4b5fd;
+}
+
+html[data-theme="dark"] .json-tree-null {
+  color: #5b21b6;
+}
+
+.json-tree-bracket {
+  opacity: 0.85;
+}
+
+.json-tree-unknown {
+  opacity: 0.75;
 }
 
 .preview-md-segment {
