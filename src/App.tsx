@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
@@ -135,6 +143,61 @@ function tryPrettyPrintAllJsonSegments(text: string): string | null {
     pos = hit.end;
   }
   return foundJson ? chunks.join("") : null;
+}
+
+/** Tab / Shift+Tab in the editor: indent or outdent; returns new text and selection. */
+function applyEditorTab(
+  value: string,
+  start: number,
+  end: number,
+  shift: boolean
+): { next: string; selStart: number; selEnd: number } {
+  if (shift) {
+    const line0 = value.lastIndexOf("\n", start - 1) + 1;
+    let line1 = value.indexOf("\n", end);
+    if (line1 === -1) line1 = value.length;
+    const block = value.slice(line0, line1);
+    const lines = block.split("\n");
+    const out = lines
+      .map((ln) =>
+        ln.startsWith("\t")
+          ? ln.slice(1)
+          : ln.startsWith("  ")
+            ? ln.slice(2)
+            : ln.startsWith(" ")
+              ? ln.slice(1)
+              : ln
+      )
+      .join("\n");
+    const next = value.slice(0, line0) + out + value.slice(line1);
+    const delta = out.length - block.length;
+    return {
+      next,
+      selStart: Math.max(line0, start + delta),
+      selEnd: Math.max(line0, end + delta),
+    };
+  }
+
+  const selected = value.slice(start, end);
+  if (!selected.includes("\n")) {
+    const next = value.slice(0, start) + "\t" + value.slice(end);
+    const p = start + 1;
+    return { next, selStart: p, selEnd: p };
+  }
+
+  const line0 = value.lastIndexOf("\n", start - 1) + 1;
+  let line1 = value.indexOf("\n", end);
+  if (line1 === -1) line1 = value.length;
+  const block = value.slice(line0, line1);
+  const lines = block.split("\n");
+  const indented = lines.map((ln) => "\t" + ln).join("\n");
+  const next = value.slice(0, line0) + indented + value.slice(line1);
+  const n = lines.length;
+  return {
+    next,
+    selStart: start + 1,
+    selEnd: end + n,
+  };
 }
 
 /** Pretty-print if the buffer can be parsed as JSON; otherwise null. */
@@ -505,6 +568,30 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const previewRef = useRef<HTMLElement>(null);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+  const editorSelectionPending = useRef<{ start: number; end: number } | null>(null);
+
+  const handleEditorKeyDown = useCallback((e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key !== "Tab") return;
+    e.preventDefault();
+    const el = e.currentTarget;
+    const { next, selStart, selEnd } = applyEditorTab(
+      el.value,
+      el.selectionStart,
+      el.selectionEnd,
+      e.shiftKey
+    );
+    editorSelectionPending.current = { start: selStart, end: selEnd };
+    setRaw(next);
+  }, []);
+
+  useLayoutEffect(() => {
+    const pending = editorSelectionPending.current;
+    const ta = editorRef.current;
+    if (!pending || !ta) return;
+    ta.setSelectionRange(pending.start, pending.end);
+    editorSelectionPending.current = null;
+  }, [raw]);
 
   useLayoutEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -719,10 +806,12 @@ export default function App() {
         <div className="pane">
           <div className="pane-header">Markdown</div>
           <textarea
+            ref={editorRef}
             className="editor"
             spellCheck={false}
             value={raw}
             onChange={(e) => setRaw(e.target.value)}
+            onKeyDown={handleEditorKeyDown}
             placeholder="Write markdown here…"
             aria-label="Markdown source"
           />
