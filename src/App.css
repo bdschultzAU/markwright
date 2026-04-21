@@ -122,6 +122,14 @@ html[data-theme="dark"] {
   border-bottom: 1px solid var(--topbar-border);
 }
 
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
 .brand {
   margin: 0;
   font-size: 1.25rem;
@@ -134,37 +142,20 @@ html[data-theme="dark"] {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  padding: 0;
-  border: 1px solid var(--icon-btn-border);
-  border-radius: 8px;
-  background: var(--icon-btn-bg);
-  color: var(--icon-btn-color);
-  cursor: pointer;
-}
-
-.theme-toggle:hover {
-  background: var(--icon-btn-hover);
-  color: var(--brand);
+  flex-shrink: 0;
 }
 
 .about-button {
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  padding: 0.45rem 0.65rem;
+  padding: 0.35rem 0.6rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: var(--topbar-muted);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .about-button:hover {
@@ -190,19 +181,10 @@ html[data-theme="dark"] {
   background: var(--icon-btn-hover);
 }
 
-.hamburger {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  width: 18px;
-}
-
-.hamburger span {
+.icon-button svg {
   display: block;
-  height: 2px;
-  border-radius: 1px;
-  background: currentColor;
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 .export-button {
@@ -284,8 +266,22 @@ html[data-theme="dark"] {
   letter-spacing: -0.02em;
 }
 
+.modal-about {
+  margin: 0 0 0.85rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--modal-text);
+}
+
+.modal-about code {
+  font-size: 0.88em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: var(--drawer-code-bg);
+}
+
 .modal-tagline {
-  margin: 0 0 1rem;
+  margin: 0.35rem 0 1rem;
   font-size: 0.9375rem;
   color: var(--modal-muted);
 }
@@ -386,6 +382,34 @@ html[data-theme="dark"] {
   overflow-y: auto;
   font-size: 0.875rem;
   line-height: 1.5;
+}
+
+.drawer-theme-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid var(--drawer-btn-border);
+  background: var(--drawer-btn-bg);
+  color: var(--drawer-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.drawer-theme-option:hover {
+  background: var(--drawer-btn-hover);
+}
+
+.drawer-theme-option svg {
+  flex-shrink: 0;
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 .drawer-option {
