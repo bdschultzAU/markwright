@@ -623,6 +623,12 @@ export default function App() {
     const el = previewRef.current;
     if (!el) return;
     setPdfExporting(true);
+    el.setAttribute("data-pdf-export", "");
+    await new Promise<void>((r) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => r());
+      });
+    });
     try {
       const html2pdf = (await import("html2pdf.js")).default;
       const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
@@ -638,6 +644,7 @@ export default function App() {
         .from(el)
         .save();
     } finally {
+      el.removeAttribute("data-pdf-export");
       setPdfExporting(false);
     }
   }, []);

@@ -860,6 +860,78 @@ html[data-theme="dark"] .json-tree-null {
   opacity: 0.75;
 }
 
+/*
+ * PDF export: jsPDF + html2canvas use a light page, but dark app theme makes preview text
+ * light-on-dark; captured text stays light and becomes unreadable on white. While capturing,
+ * the preview node has [data-pdf-export] and uses light-ink + white paper palette.
+ */
+.preview[data-pdf-export] {
+  --preview-text: #0f172a;
+  --preview-h1-border: #e2e8f0;
+  --preview-code-bg: #f1f5f9;
+  --preview-code-text: #0f172a;
+  --preview-pre-bg: #f1f5f9;
+  --preview-pre-text: #0f172a;
+  --preview-hr: #e2e8f0;
+  --preview-blockquote: #475569;
+  --preview-blockquote-border: #94a3b8;
+  --preview-link: #1d4ed8;
+  background: #fff;
+  color: var(--preview-text);
+}
+
+.preview[data-pdf-export] .preview-json-surface {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.preview[data-pdf-export] .preview-json-toolbar {
+  border-bottom-color: #e2e8f0;
+}
+
+.preview[data-pdf-export] .preview-json-toggle {
+  border-color: #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+}
+
+.preview[data-pdf-export] .preview-json-toggle:hover {
+  background: #f1f5f9;
+}
+
+.preview[data-pdf-export] .json-tree-list {
+  border-left-color: #94a3b8;
+}
+
+.preview[data-pdf-export] .json-tree-key {
+  color: #0369a1;
+}
+
+.preview[data-pdf-export] .json-tree-index {
+  color: #64748b;
+}
+
+.preview[data-pdf-export] .json-tree-caret:hover {
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.preview[data-pdf-export] .json-tree-string {
+  color: #15803d;
+}
+
+.preview[data-pdf-export] .json-tree-number {
+  color: #a16207;
+}
+
+.preview[data-pdf-export] .json-tree-bool {
+  color: #be185d;
+}
+
+.preview[data-pdf-export] .json-tree-null {
+  color: #5b21b6;
+}
+
 .preview-md-segment {
   margin-top: 0.25rem;
 }
