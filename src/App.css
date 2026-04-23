@@ -111,6 +111,9 @@ html[data-theme="dark"] {
 }
 
 .topbar {
+  /* Shared height for Copy / Export / settings (content-box + 1px border) */
+  --topbar-control-h: 2.5rem;
+  --topbar-control-px: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -141,8 +144,80 @@ html[data-theme="dark"] {
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: flex-end;
+  min-width: 0;
   flex-shrink: 0;
+}
+
+.topbar-action-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.topbar-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Same outer height as .icon-button; vertical centering via flex, not asymmetric padding. */
+.topbar-cta-row .copy-link-button,
+.topbar-cta-row .export-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--topbar-control-h);
+  height: var(--topbar-control-h);
+  padding: 0 var(--topbar-control-px);
+  line-height: 1.2;
+}
+
+.topbar-cta-row .icon-button {
+  box-sizing: border-box;
+  flex: 0 0 var(--topbar-control-h);
+  width: var(--topbar-control-h);
+  height: var(--topbar-control-h);
+  min-width: var(--topbar-control-h);
+  min-height: var(--topbar-control-h);
+}
+
+.copy-link-button {
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid var(--icon-btn-border);
+  background: var(--icon-btn-bg);
+  color: var(--icon-btn-color);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.copy-link-button:hover {
+  background: var(--icon-btn-hover);
+}
+
+.topbar-share-message {
+  margin: 0;
+  max-width: min(20rem, 70vw);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  text-align: right;
+  color: var(--topbar-muted);
+}
+
+.topbar-share-message--err {
+  color: #dc2626;
+}
+
+html[data-theme="dark"] .topbar-share-message--err {
+  color: #f87171;
 }
 
 .about-button {
@@ -167,14 +242,16 @@ html[data-theme="dark"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
   padding: 0;
   border: 1px solid var(--icon-btn-border);
   border-radius: 8px;
   background: var(--icon-btn-bg);
   color: var(--icon-btn-color);
   cursor: pointer;
+  /* Default size when not in .topbar-cta-row; topbar pins exact square. */
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
 }
 
 .icon-button:hover {
@@ -191,13 +268,14 @@ html[data-theme="dark"] {
   font: inherit;
   font-size: 0.875rem;
   font-weight: 600;
-  padding: 0.45rem 0.9rem;
   border-radius: 8px;
   border: 1px solid var(--export-border);
   background: var(--export-bg);
   color: var(--export-text);
   cursor: pointer;
   white-space: nowrap;
+  /* Padding / height in topbar come from .topbar-cta-row rules. */
+  padding: 0.45rem 0.9rem;
 }
 
 .export-button:hover:not(:disabled) {
@@ -452,21 +530,6 @@ html[data-theme="dark"] {
 
 .drawer-button code {
   font-size: 0.85em;
-}
-
-.drawer-message {
-  margin: 0.4rem 0 0;
-  font-size: 0.8125rem;
-  line-height: 1.4;
-  color: var(--drawer-muted);
-}
-
-.drawer-message--err {
-  color: #dc2626;
-}
-
-html[data-theme="dark"] .drawer-message--err {
-  color: #f87171;
 }
 
 .drawer-hint {

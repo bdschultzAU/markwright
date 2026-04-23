@@ -807,24 +807,47 @@ export default function App() {
           </button>
         </div>
         <div className="topbar-actions">
-          <button
-            type="button"
-            className="icon-button"
-            aria-label="Open settings menu"
-            aria-expanded={menuOpen}
-            aria-controls="options-drawer"
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            <IconGear />
-          </button>
-          <button
-            type="button"
-            className="export-button"
-            onClick={exportPdf}
-            disabled={pdfExporting}
-          >
-            {pdfExporting ? "Exporting…" : "Export PDF"}
-          </button>
+          <div className="topbar-action-stack">
+            <div className="topbar-cta-row">
+              <button
+                type="button"
+                className="copy-link-button"
+                onClick={() => void copyShareLink()}
+              >
+                Copy link
+              </button>
+              <button
+                type="button"
+                className="export-button"
+                onClick={exportPdf}
+                disabled={pdfExporting}
+              >
+                {pdfExporting ? "Exporting…" : "Export PDF"}
+              </button>
+              <button
+                type="button"
+                className="icon-button"
+                aria-label="Open settings menu"
+                aria-expanded={menuOpen}
+                aria-controls="options-drawer"
+                onClick={() => setMenuOpen((o) => !o)}
+              >
+                <IconGear />
+              </button>
+            </div>
+            {shareMessage && (
+              <p
+                className={
+                  shareMessage.kind === "err"
+                    ? "topbar-share-message topbar-share-message--err"
+                    : "topbar-share-message"
+                }
+                role={shareMessage.kind === "ok" ? "status" : "alert"}
+              >
+                {shareMessage.text}
+              </p>
+            )}
+          </div>
         </div>
       </header>
 
@@ -922,23 +945,6 @@ export default function App() {
           <button type="button" className="drawer-button" onClick={formatJson}>
             Format JSON in editor
           </button>
-          <button
-            type="button"
-            className="drawer-button"
-            onClick={() => void copyShareLink()}
-          >
-            Copy link to this document
-          </button>
-          {shareMessage && (
-            <p
-              className={
-                shareMessage.kind === "err" ? "drawer-message drawer-message--err" : "drawer-message"
-              }
-              role={shareMessage.kind === "ok" ? "status" : "alert"}
-            >
-              {shareMessage.text}
-            </p>
-          )}
           <p className="drawer-hint">
             Anywhere in the document, <code>{"{ … }"}</code> / <code>[ … ]</code> values that parse
             as JSON are shown formatted; other text is Markdown. JSON parsing allows{" "}
@@ -947,10 +953,11 @@ export default function App() {
             Markdown from a JSON string value, or from{" "}
             <code>markdown</code> / <code>body</code> / <code>content</code> / <code>md</code> /{" "}
             <code>text</code>. Optional query: <code>?json=…</code> (uncompressed, so long for big
-            docs). <strong>Copy link</strong> uses a compressed hash: nothing is stored on a server, but
-            the URL is still long, and <strong>very big documents can exceed what browsers and chat
-            tools accept</strong> in a link—use Export PDF or split the text if the button warns you.
-            Single line breaks in Markdown use <strong>remark-breaks</strong> (GitHub-style soft breaks).
+            docs). <strong>Copy link</strong> in the bar uses a compressed hash: nothing is stored on a
+            server, but the URL is still long, and <strong>very big documents can exceed what browsers
+            and chat tools accept</strong> in a link—use Export PDF or split the text if the button
+            warns you. Single line breaks in Markdown use <strong>remark-breaks</strong> (GitHub-style
+            soft breaks).
           </p>
         </div>
       </aside>
