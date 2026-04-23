@@ -7,6 +7,10 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
+import {
+  compressToEncodedURIComponent,
+  decompressFromEncodedURIComponent,
+} from "lz-string";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
@@ -288,6 +292,11 @@ function previewModelFromRaw(raw: string, unescapeLiteral: boolean): PreviewMode
 
 const EDITOR_STORAGE_KEY = "markwright";
 
+/** URL hash: `#d=<lz-string>` — not sent to the host; shorter than raw query strings. */
+const SHARE_HASH = "d=";
+/** Browsers, email, and chat clients vary; fail early with a clear message. */
+const MAX_SHARED_LINK_CHARS = 500_000;
+
 type StoredEditorState = { raw: string; unescapeLiteral: boolean };
 
 function readStoredEditorState(): StoredEditorState | null {
@@ -315,6 +324,29 @@ function readStoredEditorState(): StoredEditorState | null {
   return null;
 }
 
+function parseStateFromShareHash(): StoredEditorState | null {
+  if (typeof window === "undefined") return null;
+  const h = window.location.hash;
+  if (!h.startsWith(`#${SHARE_HASH}`)) return null;
+  const enc = h.slice(1 + SHARE_HASH.length);
+  if (!enc) return null;
+  const json = decompressFromEncodedURIComponent(enc);
+  if (json == null || json === "") return null;
+  try {
+    const parsed: unknown = JSON.parse(json);
+    if (typeof parsed !== "object" || parsed === null) return null;
+    const o = parsed as Record<string, unknown>;
+    if (typeof o.raw !== "string") return null;
+    const u = o.unescapeLiteral;
+    return {
+      raw: o.raw,
+      unescapeLiteral: typeof u === "boolean" ? u : true,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function getInitialState(): StoredEditorState {
   if (typeof window === "undefined") {
     return { raw: SAMPLE, unescapeLiteral: true };
@@ -332,6 +364,8 @@ function getInitialState(): StoredEditorState {
   } catch {
     // ignore malformed URI components
   }
+  const fromShare = parseStateFromShareHash();
+  if (fromShare) return fromShare;
   const stored = readStoredEditorState();
   if (stored) return stored;
   return { raw: SAMPLE, unescapeLiteral: true };
@@ -635,6 +669,52 @@ export default function App() {
     document.documentElement.style.colorScheme = theme === "dark" ? "dark" : "light";
   }, [theme]);
 
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!window.location.hash.startsWith(`#${SHARE_HASH}`)) return;
+    const { pathname, search } = window.location;
+    window.history.replaceState(null, "", `${pathname}${search}`);
+  }, []);
+
+  const [shareMessage, setShareMessage] = useState<{
+    kind: "ok" | "err";
+    text: string;
+  } | null>(null);
+
+  const copyShareLink = useCallback(async () => {
+    setShareMessage(null);
+    try {
+      const payload: StoredEditorState = { raw, unescapeLiteral };
+      const comp = compressToEncodedURIComponent(JSON.stringify(payload));
+      if (comp.length > MAX_SHARED_LINK_CHARS) {
+        setShareMessage({
+          kind: "err",
+          text: "This document is too large to fit in a link. Try a smaller excerpt or Export PDF.",
+        });
+        return;
+      }
+      const u = new URL(window.location.origin + window.location.pathname);
+      u.hash = `${SHARE_HASH}${comp}`;
+      const href = u.toString();
+      const canClipboard =
+        typeof navigator !== "undefined" && navigator.clipboard && window.isSecureContext;
+      if (!canClipboard) {
+        window.prompt("Copy this link (Ctrl/Cmd+C):", href);
+        setShareMessage({ kind: "ok", text: "Copy the text from the dialog if needed." });
+        window.setTimeout(() => setShareMessage(null), 5000);
+        return;
+      }
+      await navigator.clipboard.writeText(href);
+      setShareMessage({ kind: "ok", text: "Link copied — share it in chat, email, or a doc." });
+      window.setTimeout(() => setShareMessage(null), 4000);
+    } catch {
+      setShareMessage({
+        kind: "err",
+        text: "Could not build or copy the link. You can try Export PDF instead.",
+      });
+    }
+  }, [raw, unescapeLiteral]);
+
   useEffect(() => {
     try {
       localStorage.setItem(THEME_STORAGE_KEY, theme);
@@ -842,6 +922,23 @@ export default function App() {
           <button type="button" className="drawer-button" onClick={formatJson}>
             Format JSON in editor
           </button>
+          <button
+            type="button"
+            className="drawer-button"
+            onClick={() => void copyShareLink()}
+          >
+            Copy link to this document
+          </button>
+          {shareMessage && (
+            <p
+              className={
+                shareMessage.kind === "err" ? "drawer-message drawer-message--err" : "drawer-message"
+              }
+              role={shareMessage.kind === "ok" ? "status" : "alert"}
+            >
+              {shareMessage.text}
+            </p>
+          )}
           <p className="drawer-hint">
             Anywhere in the document, <code>{"{ … }"}</code> / <code>[ … ]</code> values that parse
             as JSON are shown formatted; other text is Markdown. JSON parsing allows{" "}
@@ -849,8 +946,11 @@ export default function App() {
             <strong>Format JSON</strong> pretty-prints when the buffer can be parsed. Preview uses
             Markdown from a JSON string value, or from{" "}
             <code>markdown</code> / <code>body</code> / <code>content</code> / <code>md</code> /{" "}
-            <code>text</code>. Optional URL: <code>?json=…</code>. Single line breaks in Markdown use{" "}
-            <strong>remark-breaks</strong> (GitHub-style soft breaks).
+            <code>text</code>. Optional query: <code>?json=…</code> (uncompressed, so long for big
+            docs). <strong>Copy link</strong> uses a compressed hash: nothing is stored on a server, but
+            the URL is still long, and <strong>very big documents can exceed what browsers and chat
+            tools accept</strong> in a link—use Export PDF or split the text if the button warns you.
+            Single line breaks in Markdown use <strong>remark-breaks</strong> (GitHub-style soft breaks).
           </p>
         </div>
       </aside>

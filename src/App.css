@@ -454,6 +454,21 @@ html[data-theme="dark"] {
   font-size: 0.85em;
 }
 
+.drawer-message {
+  margin: 0.4rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--drawer-muted);
+}
+
+.drawer-message--err {
+  color: #dc2626;
+}
+
+html[data-theme="dark"] .drawer-message--err {
+  color: #f87171;
+}
+
 .drawer-hint {
   margin: 1rem 0 0;
   padding-top: 1rem;
