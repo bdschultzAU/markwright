@@ -286,19 +286,55 @@ function previewModelFromRaw(raw: string, unescapeLiteral: boolean): PreviewMode
   return { parts: buildInterleavedSegments(raw, unescapeLiteral) };
 }
 
-function getInitialRaw(): string {
-  if (typeof window === "undefined") return SAMPLE;
+const SESSION_STORAGE_KEY = "markwright";
+
+type SessionState = { raw: string; unescapeLiteral: boolean };
+
+function readSessionState(): SessionState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const s = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (s == null || s === "") return null;
+    const parsed: unknown = JSON.parse(s);
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "raw" in parsed &&
+      typeof (parsed as { raw: unknown }).raw === "string"
+    ) {
+      const raw = (parsed as { raw: string }).raw;
+      const u = (parsed as { unescapeLiteral?: unknown }).unescapeLiteral;
+      return {
+        raw,
+        unescapeLiteral: typeof u === "boolean" ? u : true,
+      };
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function getInitialState(): SessionState {
+  if (typeof window === "undefined") {
+    return { raw: SAMPLE, unescapeLiteral: true };
+  }
   try {
     const params = new URLSearchParams(window.location.search);
     const j = params.get("json");
     if (j != null && j !== "") {
       const decoded = decodeURIComponent(j);
-      return tryBeautifyJson(decoded) ?? decoded;
+      return {
+        raw: tryBeautifyJson(decoded) ?? decoded,
+        unescapeLiteral: true,
+      };
     }
   } catch {
     // ignore malformed URI components
   }
-  return SAMPLE;
+  const session = readSessionState();
+  if (session) return session;
+  return { raw: SAMPLE, unescapeLiteral: true };
 }
 
 const THEME_STORAGE_KEY = "markwright-theme";
@@ -561,8 +597,9 @@ function IconGear() {
 }
 
 export default function App() {
-  const [raw, setRaw] = useState(getInitialRaw);
-  const [unescapeLiteral, setUnescapeLiteral] = useState(true);
+  const initial = getInitialState();
+  const [raw, setRaw] = useState(initial.raw);
+  const [unescapeLiteral, setUnescapeLiteral] = useState(initial.unescapeLiteral);
   const [theme, setTheme] = useState<"light" | "dark">(getInitialTheme);
   const [pdfExporting, setPdfExporting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -605,6 +642,15 @@ export default function App() {
       /* ignore */
     }
   }, [theme]);
+
+  useEffect(() => {
+    try {
+      const payload: SessionState = { raw, unescapeLiteral };
+      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      /* ignore */
+    }
+  }, [raw, unescapeLiteral]);
 
   const previewModel = useMemo(
     () => previewModelFromRaw(raw, unescapeLiteral),
