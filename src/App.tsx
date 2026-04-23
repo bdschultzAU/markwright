@@ -286,14 +286,14 @@ function previewModelFromRaw(raw: string, unescapeLiteral: boolean): PreviewMode
   return { parts: buildInterleavedSegments(raw, unescapeLiteral) };
 }
 
-const SESSION_STORAGE_KEY = "markwright";
+const EDITOR_STORAGE_KEY = "markwright";
 
-type SessionState = { raw: string; unescapeLiteral: boolean };
+type StoredEditorState = { raw: string; unescapeLiteral: boolean };
 
-function readSessionState(): SessionState | null {
+function readStoredEditorState(): StoredEditorState | null {
   if (typeof window === "undefined") return null;
   try {
-    const s = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    const s = localStorage.getItem(EDITOR_STORAGE_KEY);
     if (s == null || s === "") return null;
     const parsed: unknown = JSON.parse(s);
     if (
@@ -315,7 +315,7 @@ function readSessionState(): SessionState | null {
   return null;
 }
 
-function getInitialState(): SessionState {
+function getInitialState(): StoredEditorState {
   if (typeof window === "undefined") {
     return { raw: SAMPLE, unescapeLiteral: true };
   }
@@ -332,8 +332,8 @@ function getInitialState(): SessionState {
   } catch {
     // ignore malformed URI components
   }
-  const session = readSessionState();
-  if (session) return session;
+  const stored = readStoredEditorState();
+  if (stored) return stored;
   return { raw: SAMPLE, unescapeLiteral: true };
 }
 
@@ -645,8 +645,8 @@ export default function App() {
 
   useEffect(() => {
     try {
-      const payload: SessionState = { raw, unescapeLiteral };
-      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(payload));
+      const payload: StoredEditorState = { raw, unescapeLiteral };
+      localStorage.setItem(EDITOR_STORAGE_KEY, JSON.stringify(payload));
     } catch {
       /* ignore */
     }
