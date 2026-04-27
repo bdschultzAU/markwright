@@ -614,6 +614,50 @@ function PreviewJsonBlock({ pretty }: { pretty: string }) {
   );
 }
 
+/** Expand preview to full width (hide editor). */
+function IconExpandPreview() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <polyline points="15 3 21 3 21 9" />
+      <polyline points="9 21 3 21 3 15" />
+      <line x1="21" y1="3" x2="14" y2="10" />
+      <line x1="3" y1="21" x2="10" y2="14" />
+    </svg>
+  );
+}
+
+/** Restore split view with markdown editor. */
+function IconSplitPanes() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <rect x="3" y="4" width="7.5" height="16" rx="1" />
+      <rect x="13.5" y="4" width="7.5" height="16" rx="1" />
+    </svg>
+  );
+}
+
 /** Solid gear—reads clearly at 20px; thin stroke icons looked uneven in the header. */
 function IconGear() {
   return (
@@ -638,6 +682,7 @@ export default function App() {
   const [pdfExporting, setPdfExporting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [previewExpanded, setPreviewExpanded] = useState(false);
   const previewRef = useRef<HTMLElement>(null);
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const editorSelectionPending = useRef<{ start: number; end: number } | null>(null);
@@ -962,8 +1007,8 @@ export default function App() {
         </div>
       </aside>
 
-      <div className="panes">
-        <div className="pane">
+      <div className={`panes${previewExpanded ? " panes--preview-expanded" : ""}`}>
+        <div className="pane pane--markdown">
           <div className="pane-header">Markdown</div>
           <textarea
             ref={editorRef}
@@ -976,8 +1021,24 @@ export default function App() {
             aria-label="Markdown source"
           />
         </div>
-        <div className="pane">
-          <div className="pane-header">Preview</div>
+        <div className="pane pane--preview">
+          <div className="pane-header pane-header--with-actions">
+            <span>Preview</span>
+            <button
+              type="button"
+              className="pane-expand-button"
+              onClick={() => setPreviewExpanded((e) => !e)}
+              aria-pressed={previewExpanded}
+              aria-label={
+                previewExpanded
+                  ? "Show markdown editor alongside preview"
+                  : "Expand preview to use full width"
+              }
+              title={previewExpanded ? "Show editor" : "Expand preview"}
+            >
+              {previewExpanded ? <IconSplitPanes /> : <IconExpandPreview />}
+            </button>
+          </div>
           <div className="preview-wrap">
             <article ref={previewRef} className="preview">
               {previewModel.parts.map((part, idx) =>
